@@ -25,12 +25,12 @@ def potential_first_cell(blocks, idx):
 
 
 # return the size of potential sub-block and its size
-# if no sub-block exists return (0, -1)
+# if no sub-block exists return (non_positive_value, -1)
 def potential_sub_block(L, blocks, idx):
     sub_block_size = 2*block_size(blocks, idx) - \
         space_available(L, blocks, idx)
     sub_block_pos = - \
-        1 if sub_block_size == 0 else potential_sub_block_pos(L, blocks, idx)
+        1 if sub_block_size <= 0 else potential_sub_block_pos(L, blocks, idx)
     return sub_block_size, sub_block_pos
 
 
