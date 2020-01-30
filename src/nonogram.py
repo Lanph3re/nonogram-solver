@@ -13,6 +13,7 @@ class Nonogram:
         self.col_size = len(self.row_clues)
         self.num_col = len(self.col_clues)
 
+
     # TODO: print board in gui
     def __repr__(self):
         max_blocks_col = -1
