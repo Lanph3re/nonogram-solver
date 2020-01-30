@@ -1,11 +1,16 @@
 import json
+from utils import *
+
 
 def solver(puzzle):
-    num_col = len(puzzle['columns'])
-    num_row = len(puzzle['rows'])
+    cols = puzzle['columns']
+    rows = puzzle['rows']
 
-    board = [[False for _ in range(num_col)] for _ in range(num_row)]
+    board = [[False for _ in range(len(cols))] for _ in range(len(rows))]
 
+    # Simple boxes
+    for col in cols:
+        pass
 
 
 if __name__ == '__main__':
