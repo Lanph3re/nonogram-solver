@@ -65,8 +65,10 @@
               {% for row in puzzle.board %}
               <tr>
                 {% for cell in row %}
-                {% if cell == True %}
+                {% if cell == puzzle.BOX %}
                 <td class="board-cell colored"></td>
+                {% elif cell == puzzle.SPACE %}
+                <td class="board-cell">x</td>
                 {% else %}
                 <td class="board-cell"></td>
                 {% endif %}

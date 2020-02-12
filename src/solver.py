@@ -16,7 +16,7 @@ def simple_boxes(nonogram):
                 continue
 
             for i in range(sb_size):
-                nonogram.board[sb_pos + i][col_idx] = True
+                nonogram.board[sb_pos + i][col_idx] = nonogram.BOX
 
     # rows
     rsize = nonogram.row_size
@@ -31,29 +31,39 @@ def simple_boxes(nonogram):
                 continue
 
             for i in range(sb_size):
-                nonogram.board[row_idx][sb_pos + i] = True
+                nonogram.board[row_idx][sb_pos + i] = nonogram.BOX
 
 
 # fill clues that are at both end of row or column
 def simple_end(nonogram):
+    board = nonogram.board
     # columns
     for col_idx in range(nonogram.num_col):
-        if nonogram.board[0][col_idx] == True:
-            for i in range(nonogram.col_clues[col_idx][0]):
-                nonogram.board[i][col_idx] = True
+        if board[0][col_idx] == nonogram.BOX:
+            first_clue = nonogram.col_clues[col_idx][0]
+            for i in range(first_clue):
+                board[i][col_idx] = nonogram.BOX
+            board[first_clue][col_idx] = nonogram.SPACE
 
-        if nonogram.board[-1][col_idx] == True:
-            for i in range(nonogram.col_clues[col_idx][-1]):
-                nonogram.board[-1 - i][col_idx] = True
+        if board[-1][col_idx] == nonogram.BOX:
+            last_clue = nonogram.col_clues[col_idx][-1]
+            for i in range(last_clue):
+                board[-1 - i][col_idx] = nonogram.BOX
+            board[-1 - last_clue][col_idx] = nonogram.SPACE
+
     # rows
     for row_idx in range(nonogram.num_row):
-        if nonogram.board[row_idx][0] == True:
-            for i in range(nonogram.row_clues[row_idx][0]):
-                nonogram.board[row_idx][i] = True
+        if board[row_idx][0] == nonogram.BOX:
+            first_clue = nonogram.row_clues[row_idx][0]
+            for i in range(first_clue):
+                board[row_idx][i] = nonogram.BOX
+            board[row_idx][first_clue] = nonogram.SPACE
 
-        if nonogram.board[row_idx][-1] == True:
-            for i in range(nonogram.row_clues[row_idx][-1]):
-                nonogram.board[row_idx][-1 - i] = True
+        if board[row_idx][-1] == nonogram.BOX:
+            last_clue = nonogram.row_clues[row_idx][-1]
+            for i in range(last_clue):
+                board[row_idx][-1 - i] = nonogram.BOX
+            board[row_idx][-1 - last_clue] = nonogram.SPACE
 
 
 def solver(nonogram):

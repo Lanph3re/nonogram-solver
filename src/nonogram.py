@@ -1,9 +1,12 @@
 class Nonogram:
+    BOX = 0x1
+    SPACE = 0x2
+
     def __init__(self, puzzle):
         self.col_clues = puzzle['columns']
         self.row_clues = puzzle['rows']
 
-        self.board = [[False for _ in range(
+        self.board = [[0 for _ in range(
             len(self.col_clues))] for _ in range(len(self.row_clues))]
 
         assert len(self.board) == len(self.row_clues)
