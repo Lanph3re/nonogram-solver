@@ -1,40 +1,38 @@
-import json
-from utils import *
-from nonogram import *
+from utils import potential_sub_block
+
+
+# fill boxes that are self-explanatory
+def simple_boxes(nonogram):
+    # columns
+    csize = nonogram.col_size
+    for col_idx in range(nonogram.num_col):
+        col_clue = nonogram.col_clues[col_idx]
+
+        for block_idx in range(len(col_clue)):
+            sb_size, sb_pos = \
+                potential_sub_block(csize, col_clue, block_idx)
+
+            if sb_pos == -1:
+                continue
+
+            for i in range(sb_size):
+                nonogram.board[sb_pos + i][col_idx] = True
+
+    # rows
+    rsize = nonogram.row_size
+    for row_idx in range(nonogram.num_row):
+        row_clue = nonogram.row_clues[row_idx]
+
+        for block_idx in range(len(row_clue)):
+            sb_size, sb_pos = \
+                potential_sub_block(rsize, row_clue, block_idx)
+
+            if sb_pos == -1:
+                continue
+
+            for i in range(sb_size):
+                nonogram.board[row_idx][sb_pos + i] = True
 
 
 def solver(nonogram):
-    # Simple boxes - columns
-    col_size = nonogram.col_size
-    for col_idx in range(nonogram.num_col):
-        for block_idx in range(len(nonogram.col_clues[col_idx])):
-            sub_block_size, sub_block_pos = \
-                potential_sub_block(
-                    col_size, nonogram.col_clues[col_idx], block_idx)
-
-            if sub_block_pos == -1:
-                continue
-
-            for i in range(sub_block_size):
-                nonogram.board[sub_block_pos + i][col_idx] = True
-
-    # Simple boxes - rows
-    row_size = nonogram.row_size
-    for row_idx in range(nonogram.num_row):
-        for block_idx in range(len(nonogram.row_clues[row_idx])):
-            sub_block_size, sub_block_pos = \
-                potential_sub_block(
-                    row_size, nonogram.row_clues[row_idx], block_idx)
-
-            if sub_block_pos == -1:
-                continue
-
-            for i in range(sub_block_size):
-                nonogram.board[row_idx][sub_block_pos + i] = True
-
-    print(nonogram)
-
-
-if __name__ == '__main__':
-    nonogram = Nonogram(json.loads(open('../samples/sample1.json').read()))
-    solver(nonogram)
+    simple_boxes(nonogram)

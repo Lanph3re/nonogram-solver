@@ -5,11 +5,9 @@ def block_size(blocks, idx):
 def space_available(L, blocks, idx):
     sum = 0
     for i in range(len(blocks)):
-        if i == idx:
-            continue
-        sum += block_size(blocks, i)
+        sum += 0 if i == idx else block_size(blocks, i)
 
-    return (L - len(blocks) + 1 - sum)
+    return L - len(blocks) + 1 - sum
 
 
 # return zero-based index
@@ -31,10 +29,10 @@ def potential_sub_block(L, blocks, idx):
         space_available(L, blocks, idx)
     sub_block_pos = - \
         1 if sub_block_size <= 0 else potential_sub_block_pos(L, blocks, idx)
+
     return sub_block_size, sub_block_pos
 
 
 def potential_sub_block_pos(L, blocks, idx):
-    return (potential_first_cell(blocks, idx)
-            + space_available(L, blocks, idx)
-            - block_size(blocks, idx))
+    return potential_first_cell(blocks, idx) \
+        + space_available(L, blocks, idx) - block_size(blocks, idx)
