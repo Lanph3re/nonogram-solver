@@ -6,8 +6,6 @@ from src import nonogram, solver
 app = Flask(__name__)
 puzzles = listdir('puzzles')
 
-test_puzzle = 'puzzles/puzzle_1.json'
-
 
 @app.route("/")
 def puzzle_list():

@@ -34,5 +34,29 @@ def simple_boxes(nonogram):
                 nonogram.board[row_idx][sb_pos + i] = True
 
 
+# fill clues that are at both end of row or column
+def simple_end(nonogram):
+    # columns
+    for col_idx in range(nonogram.num_col):
+        if nonogram.board[0][col_idx] == True:
+            for i in range(nonogram.col_clues[col_idx][0]):
+                nonogram.board[i][col_idx] = True
+
+        if nonogram.board[-1][col_idx] == True:
+            for i in range(nonogram.col_clues[col_idx][-1]):
+                nonogram.board[-1 - i][col_idx] = True
+    # rows
+    for row_idx in range(nonogram.num_row):
+        if nonogram.board[row_idx][0] == True:
+            for i in range(nonogram.row_clues[row_idx][0]):
+                nonogram.board[row_idx][i] = True
+
+        if nonogram.board[row_idx][-1] == True:
+            for i in range(nonogram.row_clues[row_idx][-1]):
+                nonogram.board[row_idx][-1 - i] = True
+
+
 def solver(nonogram):
     simple_boxes(nonogram)
+    for _ in range(2):
+        simple_end(nonogram)
