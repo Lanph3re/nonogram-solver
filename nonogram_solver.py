@@ -1,18 +1,28 @@
-from src import nonogram, solver
 import json
-from flask import Flask, render_template
-app = Flask(__name__)
+from flask import Flask, render_template, request
+from os import listdir, path
+from src import nonogram, solver
 
-test_puzzle = 'samples/sample1.json'
+app = Flask(__name__)
+puzzles = listdir('puzzles')
+
+test_puzzle = 'puzzles/puzzle_1.json'
 
 
 @app.route("/")
-def nonogram_solver():
-    # TODO: support solver arbitrary puzzle via file upload
-    puzzle = nonogram.Nonogram(json.loads(open(test_puzzle).read()))
-    solver.solver(puzzle)
+def puzzle_list():
+    return render_template('index.html', puzzles=puzzles)
 
-    return render_template('index.html', puzzle=puzzle)
+
+@app.route('/solver')
+def nonogram_solver():
+    puzzle_name = 'puzzles/' + request.args.get('puzzle')
+    if not path.isfile(puzzle_name):
+        return render_template('index.html', puzzles=puzzles)
+    else:
+        puzzle = nonogram.Nonogram(json.loads(open(puzzle_name).read()))
+        solver.solver(puzzle)
+        return render_template('solver.html', puzzle=puzzle)
 
 
 if __name__ == '__main__':

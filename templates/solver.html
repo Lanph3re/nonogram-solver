@@ -17,11 +17,8 @@
         </h1>
       </div>
 
-      <ul>
-        {% for puzzle in puzzles %}
-        <li><a href="/solver?puzzle={{ puzzle }}">{{ puzzle }}</a></li>
-        {% endfor %}
-      </ul>
+      {% include 'board.html' %}
+
     </div>
   </div>
 </body>

@@ -16,6 +16,14 @@ html, body {
   padding-bottom: 50px;
 }
 
+ul {
+  padding-left: 20px;
+}
+
+li {
+  font-size: 20px;
+}
+
 #board {
   border: 2px solid #000000;
 }
