@@ -1,0 +1,82 @@
+{% set max_clues = namespace(max_col_clue=0, max_row_clue=0) %}
+
+{% for clue in puzzle.col_clues %}
+{% if clue|length > max_clues.max_col_clue %}
+{% set max_clues.max_col_clue = clue|length %}
+{% endif %}
+{% endfor %}
+
+{% for clue in puzzle.row_clues %}
+{% if clue|length > max_clues.max_row_clue %}
+{% set max_clues.max_row_clue = clue|length %}
+{% endif %}
+{% endfor %}
+
+<div id="board-container">
+  <table id="board">
+    <tbody>
+      <tr>
+        <td style="background: #f0f0f0;">
+          {# empty #}
+        </td>
+        <td>
+          {# column clues #}
+          <table>
+            <tbody>
+              {% for i in range(max_clues.max_col_clue) %}
+              <tr>
+                {% for clue in puzzle.col_clues %}
+                {% set num_space = max_clues.max_col_clue - clue|length %}
+                {% if i < num_space %}
+                <td class="board-cell non-clue"></td>
+                {% else %}
+                <td class="board-cell clue">{{ clue[i - num_space] }}</td>
+                {% endif %}
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          {# row clues #}
+          <table>
+            <tbody>
+              {% for row_clue in puzzle.row_clues %}
+              <tr>
+                {% set num_space = max_clues.max_row_clue - row_clue|length %}
+                {% for i in range(num_space) %}
+                <td class="board-cell non-clue"></td>
+                {% endfor %}
+                {% for clue in row_clue %}
+                <td class="board-cell clue">{{ clue }}</td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </td>
+        <td>
+          {# actual board #}
+          <table>
+            <tbody>
+              {% for row in puzzle.board %}
+              <tr>
+                {% for cell in row %}
+                {% if cell == True %}
+                <td class="board-cell colored"></td>
+                {% else %}
+                <td class="board-cell"></td>
+                {% endif %}
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

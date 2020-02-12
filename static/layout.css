@@ -1,0 +1,62 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100%;
+  font-size: 13px;
+}
+
+#inner-container {
+  padding: 100px;
+}
+
+#title {
+  padding-bottom: 50px;
+}
+
+#board {
+  border: 2px solid #000000;
+}
+
+table {
+  border-spacing: 2px;
+  border-collapse: collapse;
+}
+
+tbody {
+  vertical-align: middle;
+}
+
+tr {
+  display: table-row;
+  vertical-align: inherit;
+  border-color: inherit;
+}
+
+td.board-cell {
+  width: 22px;
+  height: 21px;
+  line-height: 19px;
+  text-align: center;
+  color: #000000;
+  vertical-align: middle;
+  border: 1px solid #8F8F8F;
+}
+
+#emtpy-area {
+  background: #8F8F8F;
+}
+
+.colored {
+  background: #000000;
+}
+
+.non-clue {
+  background: #dadada;
+}
+
+.clue {
+  background: #d0d0d0;
+}

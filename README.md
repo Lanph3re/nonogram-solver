@@ -1,5 +1,5 @@
 # Nonogram solver
-This repo is nonogram solver written in python.
+This repo is toy implementation of nonogram solver written in python.
 
 Only black and white puzzles are implemented with basic algorithms.
 

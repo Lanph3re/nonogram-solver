@@ -1,4 +1,4 @@
-from utils import potential_sub_block
+from src import utils
 
 
 # fill boxes that are self-explanatory
@@ -10,7 +10,7 @@ def simple_boxes(nonogram):
 
         for block_idx in range(len(col_clue)):
             sb_size, sb_pos = \
-                potential_sub_block(csize, col_clue, block_idx)
+                utils.potential_sub_block(csize, col_clue, block_idx)
 
             if sb_pos == -1:
                 continue
@@ -25,7 +25,7 @@ def simple_boxes(nonogram):
 
         for block_idx in range(len(row_clue)):
             sb_size, sb_pos = \
-                potential_sub_block(rsize, row_clue, block_idx)
+                utils.potential_sub_block(rsize, row_clue, block_idx)
 
             if sb_pos == -1:
                 continue

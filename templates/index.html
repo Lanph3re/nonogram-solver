@@ -4,11 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/layout.css">
   <title>Nonogram solver</title>
 </head>
 
 <body>
-  Nonogram solver!
+  <div id="main-container">
+    <div id="inner-container">
+      <div id="title">
+        <h1>
+          Nonogram solver!
+        </h1>
+      </div>
+
+      {% include 'board.html' %}
+
+    </div>
+  </div>
 </body>
 
 </html>
