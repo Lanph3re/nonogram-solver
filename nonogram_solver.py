@@ -4,7 +4,7 @@ from os import listdir, path
 from src import nonogram, solver
 
 app = Flask(__name__)
-puzzles = listdir('puzzles')
+puzzles = sorted(listdir('puzzles'))
 
 
 @app.route("/")

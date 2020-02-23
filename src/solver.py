@@ -1,4 +1,5 @@
 from src import utils
+from copy import deepcopy
 
 
 # fill boxes that are self-explanatory
@@ -137,8 +138,88 @@ def glue(nonogram):
                         board[row_idx][last_box - 1 - i] = nonogram.BOX
 
 
+def get_possible_rows(nonogram,
+                      row_idx,
+                      clue_idx,
+                      start_idx,
+                      cur_row):
+    if clue_idx == len(nonogram.row_clues[row_idx]):
+        return cur_row
+
+    clue = nonogram.row_clues[row_idx][clue_idx]
+    if nonogram.row_size - start_idx < clue:
+        return None
+
+    ret_vec = []
+    for i in range(start_idx, nonogram.row_size - clue + 1):
+        temp_row = deepcopy(cur_row)
+        for j in range(clue):
+            temp_row[i + j] = nonogram.BOX
+        ret = get_possible_rows(nonogram,
+                                row_idx,
+                                clue_idx + 1,
+                                i + clue + 1,
+                                temp_row)
+
+        if ret is not None and len(ret) != 0:
+            if clue_idx == len(nonogram.row_clues[row_idx]) - 1:
+                ret_vec.append(ret)
+            else:
+                ret_vec += ret
+
+    return ret_vec
+
+
+def filter_row(nonogram, possible_row, row_idx):
+    cur_row_with_clue = nonogram.board[row_idx]
+    for i in range(nonogram.row_size):
+        if cur_row_with_clue[i] == nonogram.BOX \
+                and possible_row[i] != nonogram.BOX:
+            return False
+
+        if cur_row_with_clue[i] == nonogram.SPACE \
+                and possible_row[i] != nonogram.SPACE:
+            return False
+    return True
+
+
+def filter_promise_rows(nonogram, possible_rows, row_idx):
+    filtered_rows = []
+    for possible_row in possible_rows:
+        if filter_row(nonogram, possible_row, row_idx):
+            filtered_rows.append(possible_row)
+
+    return filtered_rows
+
+
 def solver(nonogram):
+    # loop with deterministic algorithms
     for _ in range(5):
         simple_boxes(nonogram)
         simple_end(nonogram)
         glue(nonogram)
+
+    # now it's time to dfs
+    # get all possible combinations
+    all_possible_rows = []
+    for i in range(nonogram.num_row):
+        all_possible_rows.append(
+            get_possible_rows(
+                nonogram,
+                i,
+                0,
+                0,
+                [nonogram.SPACE for _ in range(nonogram.row_size)]
+            ))
+
+    # rows that we get above is all possible rows
+    # with no considering the constraints(clues)
+    # so it has to be filtered
+    filtered_rows = []
+    for i in range(nonogram.num_row):
+        filtered_rows.append(
+            filter_promise_rows(
+                nonogram,
+                all_possible_rows[i],
+                i
+            ))
