@@ -44,13 +44,15 @@ def simple_end(nonogram):
             first_clue = nonogram.col_clues[col_idx][0]
             for i in range(first_clue):
                 board[i][col_idx] = nonogram.BOX
-            board[first_clue][col_idx] = nonogram.SPACE
+            if first_clue != nonogram.num_row:
+                board[first_clue][col_idx] = nonogram.SPACE
 
         if board[-1][col_idx] == nonogram.BOX:
             last_clue = nonogram.col_clues[col_idx][-1]
             for i in range(last_clue):
                 board[-1 - i][col_idx] = nonogram.BOX
-            board[-1 - last_clue][col_idx] = nonogram.SPACE
+            if -1 - last_clue != -(nonogram.num_row + 1):
+                board[-1 - last_clue][col_idx] = nonogram.SPACE
 
     # rows
     for row_idx in range(nonogram.num_row):
@@ -58,13 +60,15 @@ def simple_end(nonogram):
             first_clue = nonogram.row_clues[row_idx][0]
             for i in range(first_clue):
                 board[row_idx][i] = nonogram.BOX
-            board[row_idx][first_clue] = nonogram.SPACE
+            if first_clue != nonogram.num_col:
+                board[row_idx][first_clue] = nonogram.SPACE
 
         if board[row_idx][-1] == nonogram.BOX:
             last_clue = nonogram.row_clues[row_idx][-1]
             for i in range(last_clue):
                 board[row_idx][-1 - i] = nonogram.BOX
-            board[row_idx][-1 - last_clue] = nonogram.SPACE
+            if -1 - last_clue != -(nonogram.num_col + 1):
+                board[row_idx][-1 - last_clue] = nonogram.SPACE
 
 
 def get_firstbox_column(nonogram, col_idx):
@@ -171,13 +175,12 @@ def get_possible_rows(nonogram,
 
 
 def filter_row(nonogram, possible_row, row_idx):
-    cur_row_with_clue = nonogram.board[row_idx]
+    cur_row_with_clues = nonogram.board[row_idx]
     for i in range(nonogram.row_size):
-        if cur_row_with_clue[i] == nonogram.BOX \
+        if cur_row_with_clues[i] == nonogram.BOX \
                 and possible_row[i] != nonogram.BOX:
             return False
-
-        if cur_row_with_clue[i] == nonogram.SPACE \
+        if cur_row_with_clues[i] == nonogram.SPACE \
                 and possible_row[i] != nonogram.SPACE:
             return False
     return True
@@ -190,6 +193,78 @@ def filter_promise_rows(nonogram, possible_rows, row_idx):
             filtered_rows.append(possible_row)
 
     return filtered_rows
+
+
+def semi_check(nonogram, board, row_idx):
+    cur_board_with_clues = nonogram.board
+    for i in range(row_idx + 1):
+        for j in range(nonogram.col_size):
+            if cur_board_with_clues[i][j] == nonogram.BOX\
+                    and board[i][j] != nonogram.BOX:
+                return False
+            if cur_board_with_clues[i][j] == nonogram.SPACE \
+                    and board[i][j] != nonogram.SPACE:
+                return False
+    return True
+
+
+def get_nextbox_column(nonogram, board, col_idx, cur_idx):
+    for i in range(cur_idx, nonogram.col_size):
+        if nonogram.board[i][col_idx] == nonogram.BOX:
+            return i
+    return None
+
+
+def column_check(nonogram, board, col_idx):
+    col_clue = nonogram.col_clues[col_idx]
+    cur_idx = 0
+
+    for clue in col_clue:
+        next_block_idx = get_nextbox_column(nonogram, board, col_idx, cur_idx)
+        if next_block_idx is None:
+            return False
+
+        for i in range(clue):
+            if board[next_block_idx + i][col_idx] != nonogram.BOX:
+                return False
+
+        if clue != col_clue[-1] \
+                and board[next_block_idx + clue][col_idx] != nonogram.SPACE:
+            return False
+
+        cur_idx = next_block_idx + clue + 1
+
+    return True
+
+
+def is_complete(nonogram, board):
+    for i in range(nonogram.num_col):
+        if not column_check(nonogram, board, i):
+            return False
+    return True
+
+
+def dfs(nonogram, board, possible_rows, row_idx):
+    print(row_idx)
+    if row_idx == nonogram.num_row:
+        return board if is_complete(nonogram, board) else None
+
+    for possible_row in possible_rows[row_idx]:
+        temp_board = deepcopy(board)
+        temp_board[row_idx] = possible_row
+
+        # It's hard to decide
+        # if current board satisfy all the constraints
+        # because current board is not completed.
+        # so semi-check instead of whole check
+        if not semi_check(nonogram, temp_board, row_idx):
+            continue
+
+        res = dfs(nonogram, temp_board, possible_rows, row_idx + 1)
+        if res is not None:
+            return res
+
+    return None
 
 
 def solver(nonogram):
@@ -223,3 +298,13 @@ def solver(nonogram):
                 all_possible_rows[i],
                 i
             ))
+
+    for x in filtered_rows:
+        print(len(x))
+
+    # do final solving algorithm!
+    temp_board = [
+        [0 for _ in range(nonogram.num_col)]
+        for _ in range(nonogram.num_row)
+    ]
+    dfs(nonogram, temp_board, all_possible_rows, 0)

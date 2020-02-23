@@ -6,17 +6,19 @@ class Nonogram:
         self.col_clues = puzzle['columns']
         self.row_clues = puzzle['rows']
 
-        self.board = [[0 for _ in range(
-            len(self.col_clues))] for _ in range(len(self.row_clues))]
-
-        assert len(self.board) == len(self.row_clues)
-        assert len(self.board[0]) == len(self.col_clues)
-
         self.row_size = len(self.col_clues)
         self.num_row = len(self.row_clues)
 
         self.col_size = len(self.row_clues)
         self.num_col = len(self.col_clues)
+
+        self.board = [
+            [0 for _ in range(self.num_col)]
+            for _ in range(self.num_row)
+        ]
+
+        assert len(self.board) == len(self.row_clues)
+        assert len(self.board[0]) == len(self.col_clues)
 
     def check_complete(self):
         pass
