@@ -1,6 +1,9 @@
+import random
+
+
 class Nonogram:
-    BOX = 0x1
-    SPACE = 0x2
+    BOX = 1
+    SPACE = 2
 
     def __init__(self, puzzle):
         self.col_clues = puzzle['columns']
@@ -13,12 +16,16 @@ class Nonogram:
         self.num_col = len(self.col_clues)
 
         self.board = [
-            [0 for _ in range(self.num_col)]
+            [False for _ in range(self.num_col)]
             for _ in range(self.num_row)
         ]
 
-        assert len(self.board) == len(self.row_clues)
-        assert len(self.board[0]) == len(self.col_clues)
+    def random(self):
+        for i in range(self.num_row):
+            for j in range(self.num_col):
+                self.board[i][j] = random.getrandbits(1)
 
-    def check_complete(self):
+        return self
+
+    def is_solved(self):
         pass
