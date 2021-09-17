@@ -2,10 +2,36 @@
 <html lang="en">
 
 <head>
+  <title>Nonogram solver</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/static/layout.css">
-  <title>Nonogram solver</title>
+  <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+  <script type="text/javascript" src="https://cdn.socket.io/4.2.0/socket.io.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      var socket = io.connect('http://localhost:5000');
+
+      socket.on('on_connect', msg => {
+        document.getElementById('log').innerHTML += '[+] ' + msg.data + '<br>';
+      });
+
+      socket.on('on_update', msg => {
+        let table = document.getElementById("puzzle");
+        for (var i = 0, row; row = table.rows[i]; i++) {
+          for (var j = 0, col; col = row.cells[j]; j++) {
+            if (msg.board[i][j] == 0) {
+              col.setAttribute('class', 'board-cell');
+            } else {
+              col.setAttribute('class', 'board-cell colored');
+            }
+          }
+        }
+      });
+
+      setInterval(() => { socket.emit('update', {}); }, 500);
+    });
+  </script>
 </head>
 
 <body>
@@ -18,6 +44,8 @@
       </div>
 
       {% include 'board.html' %}
+
+      <div id="log"></div>
 
     </div>
   </div>

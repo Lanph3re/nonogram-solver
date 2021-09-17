@@ -9,23 +9,57 @@ class Nonogram:
         self.col_clues = puzzle['columns']
         self.row_clues = puzzle['rows']
 
-        self.row_size = len(self.col_clues)
         self.num_row = len(self.row_clues)
-
-        self.col_size = len(self.row_clues)
         self.num_col = len(self.col_clues)
 
         self.board = [
-            [False for _ in range(self.num_col)]
+            [0 for _ in range(self.num_col)]
             for _ in range(self.num_row)
         ]
 
-    def random(self):
-        for i in range(self.num_row):
-            for j in range(self.num_col):
-                self.board[i][j] = random.getrandbits(1)
+    def get_width(self):
+        return self.num_col
 
-        return self
+    def get_height(self):
+        return self.num_row
+
+    def _get_num_blocks(self, arr):
+        blocks = []
+        cnt = 0
+        for cell in arr:
+            if cell == 1:
+                cnt += 1
+            elif cell == 0 and cnt != 0:
+                blocks.append(cnt)
+                cnt = 0
+            else:
+                pass
+
+        if cnt != 0:
+            blocks.append(cnt)
+
+        return blocks
+
+    def get_num_blocks_row(self, i):
+        return self._get_num_blocks(self.board[i])
+
+    def get_num_blocks_column(self, i):
+        col = [row[i] for row in self.board]
+        return self._get_num_blocks(col)
+
+    def get_num_cells_row(self, i):
+        cnt = 0
+        for cell in self.board[i]:
+            if cell == 1: cnt += 1
+        
+        return cnt
+
+    def get_num_cells_column(self, i):
+        cnt = 0
+        for j in range(self.get_height()):
+            if self.board[j][i] == 1: cnt += 1
+        
+        return cnt
 
     def is_solved(self):
         pass
