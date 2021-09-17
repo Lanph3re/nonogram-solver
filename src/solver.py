@@ -5,17 +5,33 @@ from .nonogram import Nonogram
 
 
 class Population:
-    MUTATION_RATE = 0.001
+    MUTATION_RATE = 0.1
 
     def __init__(self, nonogram):
         self.nonogram = nonogram
         self.fitness = 0
 
     @classmethod
+    def get_satisfying_arr(cls, size, clue):
+        spaces = [1 for _ in range(len(clue) + 1)]
+        spaces[0] = 0
+        spaces[-1] = 0
+        while sum(spaces) < size - sum(clue):
+            spaces[random.randint(0, len(spaces) - 1)] += 1
+
+        arr = []
+        for i in range(len(clue)):
+            arr.extend([0 for _ in range(spaces[i])] +
+                       [1 for _ in range(clue[i])])
+        arr.extend([0 for _ in range(spaces[-1])])
+
+        return arr
+
+    @classmethod
     def random(cls, nonogram: Nonogram):
         for i in range(nonogram.get_height()):
-            for j in range(nonogram.get_width()):
-                nonogram.board[i][j] = random.getrandbits(1)
+            nonogram.board[i] = Population.get_satisfying_arr(
+                nonogram.get_width(), nonogram.row_clues[i])
 
         return Population(nonogram)
 
@@ -23,29 +39,15 @@ class Population:
         nonogram = self.nonogram
         fitness = 0
 
-        for i in range(nonogram.get_height()):
-            clues = nonogram.row_clues[i]
-            num_clues = len(clues)
-            blocks = nonogram.get_num_blocks_row(i)
-            num_blocks = len(blocks)
-
-            if num_blocks <= num_clues:
-                fitness += num_blocks*19
-                for k in range(num_blocks):
-                    if blocks[k] != clues[k]:
-                        fitness -= abs(blocks[k] - clues[k])*10
-
         for j in range(nonogram.get_width()):
             clues = nonogram.col_clues[j]
-            num_clues = len(clues)
             blocks = nonogram.get_num_blocks_column(j)
-            num_blocks = len(blocks)
 
-            if num_blocks <= num_clues:
-                fitness += num_blocks*19
-                for k in range(num_blocks):
-                    if blocks[k] != clues[k]:
-                        fitness -= abs(blocks[k] - clues[k])*10
+            if len(blocks) > len(clues):
+                fitness -= 100
+
+            for k in range(min(len(blocks), len(clues))):
+                fitness -= abs(blocks[k] - clues[k])*30
 
         return fitness
 
@@ -53,19 +55,29 @@ class Population:
     def crossover(cls, puzzle, a: 'Population', b: 'Population'):
         new = Nonogram(puzzle)
         for i in range(a.nonogram.get_height()):
-            for j in range(a.nonogram.get_width()):
-                if random.getrandbits(1):
-                    new.board[i][j] = a.nonogram.board[i][j]
-                else:
-                    new.board[i][j] = b.nonogram.board[i][j]
+            if random.getrandbits(1):
+                new.board[i] = a.nonogram.board[i]
+            else:
+                new.board[i] = b.nonogram.board[i]
 
         return Population(new)
 
     def mutate(self):
-        for i in range(self.nonogram.get_height()):
-            for j in range(self.nonogram.get_height()):
-                if random.random() <= self.MUTATION_RATE:
-                    self.nonogram.board[i][j] ^= 1
+        if random.random() <= self.MUTATION_RATE:
+            i = random.randint(0, self.nonogram.get_height() - 1)
+            self.nonogram.board[i] = Population.get_satisfying_arr(
+                self.nonogram.get_width(), self.nonogram.row_clues[i])
+
+        if random.random() <= self.MUTATION_RATE:
+            i = random.randint(0, self.nonogram.get_height() - 1)
+            j = random.randint(0, self.nonogram.get_height() - 1)
+            if i > j:
+                i, j = j, i
+
+            while i < j:
+                self.nonogram.board[i] = Population.get_satisfying_arr(
+                    self.nonogram.get_width(), self.nonogram.row_clues[i])
+                i += 1
 
         return self
 
