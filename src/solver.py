@@ -1,3 +1,4 @@
+from itertools import permutations
 from math import exp
 import random
 
@@ -5,7 +6,8 @@ from .nonogram import Nonogram
 
 
 class Population:
-    MUTATION_RATE = 0.1
+    CROSSOVER_RATE = 0.6
+    MUTATION_RATE = 0.001
 
     def __init__(self, nonogram):
         self.nonogram = nonogram
@@ -35,7 +37,7 @@ class Population:
 
         return Population(nonogram)
 
-    def evaluate_fitness(self):
+    def update_fitness(self):
         nonogram = self.nonogram
         fitness = 0
 
@@ -49,18 +51,17 @@ class Population:
             for k in range(min(len(blocks), len(clues))):
                 fitness -= abs(blocks[k] - clues[k])*30
 
-        return fitness
+        self.fitness = fitness
+        return self
 
     @ classmethod
     def crossover(cls, puzzle, a: 'Population', b: 'Population'):
-        new = Nonogram(puzzle)
-        for i in range(a.nonogram.get_height()):
-            if random.getrandbits(1):
-                new.board[i] = a.nonogram.board[i]
-            else:
-                new.board[i] = b.nonogram.board[i]
+        if random.random() <= cls.CROSSOVER_RATE:
+            point = random.randint(0, a.nonogram.get_height() - 1)
+            a.nonogram.board[point:], b.nonogram.board[point:] = \
+                b.nonogram.board[point:], a.nonogram.board[point:]
 
-        return Population(new)
+        return a, b
 
     def mutate(self):
         if random.random() <= self.MUTATION_RATE:
@@ -68,24 +69,13 @@ class Population:
             self.nonogram.board[i] = Population.get_satisfying_arr(
                 self.nonogram.get_width(), self.nonogram.row_clues[i])
 
-        if random.random() <= self.MUTATION_RATE:
-            i = random.randint(0, self.nonogram.get_height() - 1)
-            j = random.randint(0, self.nonogram.get_height() - 1)
-            if i > j:
-                i, j = j, i
-
-            while i < j:
-                self.nonogram.board[i] = Population.get_satisfying_arr(
-                    self.nonogram.get_width(), self.nonogram.row_clues[i])
-                i += 1
-
         return self
 
 
 class GeneticAlgorithmSolver:
     POPULATION_SIZE = 100
-    LINEAR_RANKING_PARAMETER = 1
     MAX_GENERATION = 1000
+    LINEAR_RANKING_PARAMETER = 1
     NUM_ELITES = 4
 
     def __init__(self, puzzle):
@@ -95,38 +85,45 @@ class GeneticAlgorithmSolver:
 
     def _initialize_population(self):
         for _ in range(self.POPULATION_SIZE):
-            population = Population.random(Nonogram(self.puzzle))
-            population.fitness = population.evaluate_fitness()
+            population = Population.random(
+                Nonogram(self.puzzle)).update_fitness()
             self.current_generation.append(population)
 
     def _exponential_ranking_select(self):
-        weights = [i for i in range(1, self.POPULATION_SIZE + 1)]
-        weights = [1 - exp(-x) for x in weights]
+        weights = [1 - exp(-x) for x in range(1, self.POPULATION_SIZE + 1)]
         denominator = sum(weights)
         return random.choices(
             population=self.current_generation,
             weights=[x / denominator for x in weights],
             k=2)
 
-    def _select(self):
-        weights = [i for i in range(0, self.POPULATION_SIZE)]
-        weights = [(2 - self.LINEAR_RANKING_PARAMETER) / self.POPULATION_SIZE +
-                   i*(self.LINEAR_RANKING_PARAMETER - 1) / sum(weights) for i in weights]
+    def _linear_ranking_select(self):
+        weights = [
+            ((2 - self.LINEAR_RANKING_PARAMETER) / self.POPULATION_SIZE)
+            + (i*(self.LINEAR_RANKING_PARAMETER - 1) /
+               sum(range(0, self.POPULATION_SIZE)))
+            for i in range(0, self.POPULATION_SIZE)
+        ]
         return random.choices(
             population=self.current_generation,
             weights=weights,
             k=2)
 
+    def _select(self):
+        return self._linear_ranking_select()
+
     def generate_solutions(self):
         self._initialize_population()
+
         while True:
-            next_generation = []
-            next_generation.extend(self.current_generation[-self.NUM_ELITES:])
-            for _ in range(self.POPULATION_SIZE - self.NUM_ELITES):
+            next_generation = self.current_generation[-self.NUM_ELITES:]
+            while len(next_generation) < self.POPULATION_SIZE:
                 a, b = self._select()
-                new = Population.crossover(self.puzzle, a, b).mutate()
-                new.fitness = new.evaluate_fitness()
-                next_generation.append(new)
+                a, b = Population.crossover(self.puzzle, a, b)
+                a, b = a.mutate(), b.mutate()
+                a.update_fitness()
+                b.update_fitness()
+                next_generation.extend([a, b])
 
             self.current_generation = sorted(
                 next_generation, key=lambda x: x.fitness)
