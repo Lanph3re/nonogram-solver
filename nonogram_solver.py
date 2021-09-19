@@ -8,7 +8,6 @@ from flask_socketio import SocketIO, emit
 from src.nonogram import Nonogram
 from src.solver import GeneticAlgorithmSolver, Population
 
-
 PUZZLE_DIR = 'puzzles'
 
 app = Flask(__name__)
@@ -52,13 +51,16 @@ def run_solver():
         emit('on_connect', {'data': 'Running genetic algorithm solver..'})
 
 
-@ socketio.on('update')
+@socketio.on('update')
 def update_board(data):
     if 'user' not in session:
         emit('on_update', {})
     else:
-        fittest = solvers[session['user']].get_fittest_population()
-        emit('on_update', {'board': fittest.nonogram.board})
+        fittest, fitness = solvers[session['user']].get_fittest_population()
+        emit('on_update', {
+            'board': fittest.nonogram.board,
+            'fitness': fitness
+        })
 
 
 if __name__ == '__main__':

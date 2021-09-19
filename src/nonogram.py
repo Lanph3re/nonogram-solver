@@ -12,16 +12,20 @@ class Nonogram:
         self.num_row = len(self.row_clues)
         self.num_col = len(self.col_clues)
 
-        self.board = [
-            [0 for _ in range(self.num_col)]
-            for _ in range(self.num_row)
-        ]
+        self.board = [[0 for _ in range(self.num_col)]
+                      for _ in range(self.num_row)]
 
     def get_width(self):
         return self.num_col
 
     def get_height(self):
         return self.num_row
+
+    def get_column(self, i):
+        column = []
+        for j in range(self.get_height()):
+            column.append(self.board[j][i])
+        return column
 
     def _get_num_blocks(self, arr):
         blocks = []
@@ -46,20 +50,6 @@ class Nonogram:
     def get_num_blocks_column(self, i):
         col = [row[i] for row in self.board]
         return self._get_num_blocks(col)
-
-    def get_num_cells_row(self, i):
-        cnt = 0
-        for cell in self.board[i]:
-            if cell == 1: cnt += 1
-        
-        return cnt
-
-    def get_num_cells_column(self, i):
-        cnt = 0
-        for j in range(self.get_height()):
-            if self.board[j][i] == 1: cnt += 1
-        
-        return cnt
 
     def is_solved(self):
         pass

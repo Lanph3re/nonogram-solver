@@ -16,7 +16,13 @@
         document.getElementById('log').innerHTML += '[+] ' + msg.data + '<br>';
       });
 
+      let generation_cnt = 0;
       socket.on('on_update', msg => {
+        generation_cnt += 1;
+        if (generation_cnt % 20 == 0) {
+          document.getElementById('log').innerHTML += '[+] fitness: ' + msg.fitness + '<br>';
+        }
+
         let table = document.getElementById("puzzle");
         for (var i = 0, row; row = table.rows[i]; i++) {
           for (var j = 0, col; col = row.cells[j]; j++) {
@@ -29,7 +35,7 @@
         }
       });
 
-      setInterval(() => { socket.emit('update', {}); }, 500);
+      setInterval(() => { socket.emit('update', {}); }, 200);
     });
   </script>
 </head>
