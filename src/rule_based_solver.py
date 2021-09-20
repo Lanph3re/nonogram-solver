@@ -50,7 +50,7 @@ class RuleBasedSolver:
                 return j
         return None
 
-    def _get_lastbox_column(self, i):
+    def _get_lastbox_row(self, i):
         for j in range(self.nonogram.get_width()):
             if self.nonogram.board[i][-(j + 1)] == self.nonogram.BOX:
                 return -(j + 1)
@@ -128,7 +128,7 @@ class RuleBasedSolver:
                         if first_box + 1 + i < self.nonogram.get_width():
                             board[j][first_box + 1 + i] = self.nonogram.BOX
 
-            last_box = self._get_lastbox_column(j)
+            last_box = self._get_lastbox_row(j)
             if last_box is not None:
                 distance = -last_box
                 last_clue = self.nonogram.row_clues[j][-1]
