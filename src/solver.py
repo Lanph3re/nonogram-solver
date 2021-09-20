@@ -1,14 +1,14 @@
 from itertools import permutations
 from math import exp
 import random
+import copy
 
 from .nonogram import Nonogram
 
 
 class Population:
     CROSSOVER_RATE = 0.6
-    MUTATION_RATE = 0.001
-    SAMPLING_COLUMN_SIZE = 30
+    SAMPLING_COLUMN_SIZE = 20
 
     def __init__(self, nonogram):
         self.nonogram = nonogram
@@ -51,15 +51,14 @@ class Population:
                 for _ in range(self.SAMPLING_COLUMN_SIZE)
             ]
 
+            column = nonogram.get_column(j)
             for possible_column in possible_columns:
-                fitness_column = 0
-                column = nonogram.get_column(j)
-                for k in range(nonogram.get_height()):
-                    if column[k] == possible_column[k]:
-                        fitness_column += 10
-
-                max_fitness_column = max(
-                    max_fitness_column, fitness_column / nonogram.get_height())
+                fitness_column = sum([
+                    10 if column[k] == possible_column[k] else 0
+                    for k in range(nonogram.get_height())
+                ])
+                fitness_column /= nonogram.get_height()
+                max_fitness_column = max(max_fitness_column, fitness_column)
 
             fitness += max_fitness_column
 
@@ -75,11 +74,12 @@ class Population:
 
         return a, b
 
-    def mutate(self):
-        if random.random() <= self.MUTATION_RATE:
-            i = random.randint(0, self.nonogram.get_height() - 1)
-            self.nonogram.board[i] = Population.get_satisfying_arr(
-                self.nonogram.get_width(), self.nonogram.row_clues[i])
+    def mutate(self, mutation_rate):
+        for _ in range(random.randint(0, 3)):
+            if random.random() <= mutation_rate:
+                i = random.randint(0, self.nonogram.get_height() - 1)
+                self.nonogram.board[i] = Population.get_satisfying_arr(
+                    self.nonogram.get_width(), self.nonogram.row_clues[i])
 
         return self
 
@@ -88,12 +88,14 @@ class GeneticAlgorithmSolver:
     POPULATION_SIZE = 100
     MAX_GENERATION = 1000
     LINEAR_RANKING_PARAMETER = 1
-    NUM_ELITES = 4
+    NUM_ELITES = 2
 
     def __init__(self, puzzle):
         self.puzzle = puzzle
         self.current_generation = []
         self.generation_cnt = 0
+        self.max_fitness = 0
+        self.mutation_rate = 0.001
 
     def _initialize_population(self):
         for _ in range(self.POPULATION_SIZE):
@@ -125,17 +127,29 @@ class GeneticAlgorithmSolver:
         self._initialize_population()
 
         while True:
-            next_generation = self.current_generation[-self.NUM_ELITES:]
+            next_generation = copy.deepcopy(
+                self.current_generation[-self.NUM_ELITES:])
             while len(next_generation) < self.POPULATION_SIZE:
-                a, b = self._select()
+                a, b = copy.deepcopy(self._select())
                 a, b = Population.crossover(self.puzzle, a, b)
-                a, b = a.mutate(), b.mutate()
+                a = a.mutate(self.mutation_rate)
+                b = b.mutate(self.mutation_rate)
                 a.update_fitness()
                 b.update_fitness()
                 next_generation.extend([a, b])
 
             self.current_generation = \
                 sorted(next_generation, key=lambda x: x.fitness)
+
+            fitness_delta = abs(self.max_fitness -
+                                self.current_generation[-1].fitness)
+            if fitness_delta < 0.001:
+                self.mutation_rate = min(self.mutation_rate + 0.001, 1)
+            else:
+                self.mutation_rate = max(self.mutation_rate - 0.001, 0)
+
+            self.max_fitness = max(self.max_fitness,
+                                   self.current_generation[-1].fitness)
             self.generation_cnt += 1
 
         return self.current_generation

@@ -17,10 +17,13 @@
       });
 
       let generation_cnt = 0;
+      let max_fitness = 0;
       socket.on('on_update', msg => {
-        generation_cnt += 1;
-        if (generation_cnt % 20 == 0) {
-          document.getElementById('log').innerHTML += '[+] fitness: ' + msg.fitness + '<br>';
+        if (msg.fitness > max_fitness) {
+          max_fitness = msg.fitness
+          document.getElementById('title_').innerHTML = 'Nonogram solver! [Fitness: ';
+          document.getElementById('title_').innerHTML += msg.fitness;
+          document.getElementById('title_').innerHTML += ']';
         }
 
         let table = document.getElementById("puzzle");
@@ -44,8 +47,8 @@
   <div id="main-container">
     <div id="inner-container">
       <div id="title">
-        <h1>
-          Nonogram solver!
+        <h1 id="title_">
+          Nonogram solver! [Fitness: 1]
         </h1>
       </div>
 
