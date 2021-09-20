@@ -44,9 +44,6 @@ class Nonogram:
 
         return blocks
 
-    def get_num_blocks_row(self, i):
-        return self._get_num_blocks(self.board[i])
-
     def get_num_blocks_column(self, i):
         col = [row[i] for row in self.board]
         return self._get_num_blocks(col)
