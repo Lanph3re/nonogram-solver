@@ -123,33 +123,33 @@ class GeneticAlgorithmSolver:
     def _select(self):
         return self._linear_ranking_select()
 
+    def _update_mutation_rate(self):
+        fitness_delta = abs(self.max_fitness -
+                            self.current_generation[-1].fitness)
+        if fitness_delta < 0.001:
+            self.mutation_rate = min(self.mutation_rate + 0.001, 1)
+        else:
+            self.mutation_rate = max(self.mutation_rate - 0.001, 0)
+
+        self.max_fitness = max(self.max_fitness,
+                               self.current_generation[-1].fitness)
+
     def generate_solutions(self):
         self._initialize_population()
-
         while True:
             next_generation = copy.deepcopy(
                 self.current_generation[-self.NUM_ELITES:])
+
             while len(next_generation) < self.POPULATION_SIZE:
                 a, b = copy.deepcopy(self._select())
                 a, b = Population.crossover(self.puzzle, a, b)
-                a = a.mutate(self.mutation_rate)
-                b = b.mutate(self.mutation_rate)
-                a.update_fitness()
-                b.update_fitness()
-                next_generation.extend([a, b])
+                a = a.mutate(self.mutation_rate).update_fitness()
+                b = b.mutate(self.mutation_rate).update_fitness()
+                next_generation += [a, b]
 
             self.current_generation = \
                 sorted(next_generation, key=lambda x: x.fitness)
-
-            fitness_delta = abs(self.max_fitness -
-                                self.current_generation[-1].fitness)
-            if fitness_delta < 0.001:
-                self.mutation_rate = min(self.mutation_rate + 0.001, 1)
-            else:
-                self.mutation_rate = max(self.mutation_rate - 0.001, 0)
-
-            self.max_fitness = max(self.max_fitness,
-                                   self.current_generation[-1].fitness)
+            self._update_mutation_rate()
             self.generation_cnt += 1
 
         return self.current_generation
