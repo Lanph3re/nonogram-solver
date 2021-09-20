@@ -4,6 +4,7 @@ import random
 import copy
 
 from .nonogram import Nonogram
+from .rule_based_solver import RuleBasedSolver
 
 
 class Population:
@@ -31,10 +32,21 @@ class Population:
         return arr
 
     @classmethod
-    def random(cls, nonogram: 'Nonogram'):
+    def is_minimum(cls, nonogram: 'Nonogram', arr, min_arr):
+        for j in range(nonogram.get_width()):
+            if min_arr[j] == nonogram.BOX and arr[j] != nonogram.BOX:
+                return False
+        return True
+
+    @classmethod
+    def random(cls, nonogram: 'Nonogram', min_solution):
         for i in range(nonogram.get_height()):
-            nonogram.board[i] = Population.get_satisfying_arr(
-                nonogram.get_width(), nonogram.row_clues[i])
+            while True:
+                row = Population.get_satisfying_arr(
+                    nonogram.get_width(), nonogram.row_clues[i])
+                if cls.is_minimum(nonogram, row, min_solution[i]):
+                    break
+            nonogram.board[i] = row
 
         return Population(nonogram)
 
@@ -66,7 +78,7 @@ class Population:
         return self
 
     @classmethod
-    def crossover(cls, puzzle, a: 'Population', b: 'Population'):
+    def crossover(cls, a: 'Population', b: 'Population'):
         if random.random() <= cls.CROSSOVER_RATE:
             point = random.randint(0, a.nonogram.get_height() - 1)
             a.nonogram.board[point:], b.nonogram.board[point:] = \
@@ -95,11 +107,13 @@ class GeneticAlgorithmSolver:
         self.current_generation = []
         self.generation_cnt = 0
         self.max_fitness = 0
-        self.mutation_rate = 0.001
+        self.mutation_rate = 0.7
+        self.min_solution = RuleBasedSolver(puzzle).generate_solution().board
 
     def _initialize_population(self):
         for _ in range(self.POPULATION_SIZE):
-            population = Population.random(Nonogram(self.puzzle))
+            population = Population.random(
+                Nonogram(self.puzzle), self.min_solution)
             self.current_generation.append(population.update_fitness())
 
     def _exponential_ranking_select(self):

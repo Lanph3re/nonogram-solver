@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, session
 from flask_socketio import SocketIO, emit
 
 from src.nonogram import Nonogram
-from src.solver import GeneticAlgorithmSolver, Population
+from src.genetic_algorithm_solver import GeneticAlgorithmSolver, Population
 
 PUZZLE_DIR = 'puzzles'
 
@@ -38,9 +38,7 @@ def nonogram_solver():
             args=[solvers, session['user']])
     solver_thread.setDaemon(True)
     solver_thread.start()
-
-    test = Population.random(Nonogram(puzzle))
-    return render_template('solver.html', puzzle=test.nonogram)
+    return render_template('solver.html', puzzle=Nonogram(puzzle))
 
 
 @socketio.on('connect')
