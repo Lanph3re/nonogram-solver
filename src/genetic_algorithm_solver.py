@@ -156,7 +156,7 @@ class GeneticAlgorithmSolver:
 
             while len(next_generation) < self.POPULATION_SIZE:
                 a, b = copy.deepcopy(self._select())
-                a, b = Population.crossover(self.puzzle, a, b)
+                a, b = Population.crossover(a, b)
                 a = a.mutate(self.mutation_rate).update_fitness()
                 b = b.mutate(self.mutation_rate).update_fitness()
                 next_generation += [a, b]
