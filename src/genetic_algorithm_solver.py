@@ -27,8 +27,8 @@ class Population:
         for i in range(len(clue)):
             arr += [0 for _ in range(spaces[i])]
             arr += [1 for _ in range(clue[i])]
-
         arr += [0 for _ in range(spaces[-1])]
+
         return arr
 
     @classmethod
@@ -56,14 +56,12 @@ class Population:
 
         for j in range(nonogram.get_width()):
             clue = nonogram.col_clues[j]
-
             max_fitness_column = 0
+            column = nonogram.get_column(j)
             possible_columns = [
                 self.get_satisfying_arr(nonogram.get_height(), clue)
                 for _ in range(self.SAMPLING_COLUMN_SIZE)
             ]
-
-            column = nonogram.get_column(j)
             for possible_column in possible_columns:
                 fitness_column = sum([
                     10 if column[k] == possible_column[k] else 0
@@ -87,7 +85,7 @@ class Population:
         return a, b
 
     def mutate(self, mutation_rate):
-        for _ in range(random.randint(0, 3)):
+        for _ in range(random.randint(1, 3)):
             if random.random() <= mutation_rate:
                 i = random.randint(0, self.nonogram.get_height() - 1)
                 self.nonogram.board[i] = Population.get_satisfying_arr(
