@@ -107,7 +107,7 @@ class GeneticAlgorithmSolver:
         self.current_generation = []
         self.generation_cnt = 0
         self.max_fitness = 0
-        self.mutation_rate = 0.7
+        self.mutation_rate = 0.2
         self.min_solution = RuleBasedSolver(puzzle).generate_solution().board
 
     def _initialize_population(self):
