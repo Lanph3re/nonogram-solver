@@ -89,7 +89,6 @@ class Population:
 
 
 class GeneticAlgorithmSolver:
-    SAMPLING_COLUMN_SIZE = 30
     POPULATION_SIZE = 100
     LINEAR_RANKING_PARAMETER = 1
     NUM_ELITES = 2
@@ -108,7 +107,7 @@ class GeneticAlgorithmSolver:
             [
                 Population.get_satisfying_arr(
                     self.nonogram.get_height(), self.nonogram.col_clues[i])
-                for _ in range(self.SAMPLING_COLUMN_SIZE)
+                for _ in range(self.nonogram.get_height() * 2)
             ] for i in range(self.nonogram.get_width())
         ]
 
