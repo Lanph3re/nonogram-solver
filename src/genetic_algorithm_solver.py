@@ -99,10 +99,11 @@ class GeneticAlgorithmSolver:
         self.nonogram = Nonogram(puzzle)
         self.current_generation = []
         self.max_generation = max_generation
-        self.generation_cnt = 0
+        self.generation = 0
         self.max_fitness = 0
         self.mutation_rate = 0.2
-        self.min_solution = RuleBasedSolver(puzzle).generate_solution().board
+        self.min_solution = \
+            RuleBasedSolver(puzzle).generate_solution().board
         self.column_pool = [
             [
                 Population.get_satisfying_arr(
@@ -112,11 +113,11 @@ class GeneticAlgorithmSolver:
         ]
 
     def _initialize_population(self):
-        for _ in range(self.POPULATION_SIZE):
-            population = Population.random(Nonogram(self.puzzle),
-                                           self.min_solution)
-            self.current_generation.append(
-                population.update_fitness(self.column_pool))
+        self.current_generation = [
+            Population.random(Nonogram(self.puzzle), self.min_solution)
+            for _ in range(self.POPULATION_SIZE)]
+        for population in self.current_generation:
+            population.update_fitness(self.column_pool)
 
     def _exponential_ranking_select(self):
         weights = [1 - exp(-x) for x in range(1, self.POPULATION_SIZE + 1)]
@@ -145,16 +146,17 @@ class GeneticAlgorithmSolver:
         if fitness_delta < 0.001:
             self.mutation_rate = min(self.mutation_rate + 0.001, 1)
         else:
-            self.mutation_rate = max(self.mutation_rate / 2, 0)
+            self.mutation_rate /= 2
 
         self.max_fitness = max(self.max_fitness,
                                self.current_generation[-1].fitness)
 
     def generate_solutions(self):
         self._initialize_population()
-        while self.is_running and self.generation_cnt < self.max_generation:
-            next_generation = copy.deepcopy(
-                self.current_generation[-self.NUM_ELITES:])
+        while self.is_running \
+                and self.generation < self.max_generation:
+            next_generation = \
+                copy.deepcopy(self.current_generation[-self.NUM_ELITES:])
 
             while len(next_generation) < self.POPULATION_SIZE:
                 a, b = copy.deepcopy(self._select())
@@ -168,11 +170,14 @@ class GeneticAlgorithmSolver:
             self.current_generation = \
                 sorted(next_generation, key=lambda x: x.fitness)
             self._update_mutation_rate()
-            self.generation_cnt += 1
+            self.generation += 1
 
         return self.current_generation
 
     def get_fittest_population(self):
+        while len(self.current_generation) == 0:
+            return 0, Nonogram(self.puzzle), 0, True
+
         fittest = self.current_generation[-1]
-        is_running = self.generation_cnt != self.max_generation
-        return self.generation_cnt, fittest, fittest.fitness, is_running
+        is_running = self.generation != self.max_generation
+        return self.generation, fittest, fittest.fitness, is_running
