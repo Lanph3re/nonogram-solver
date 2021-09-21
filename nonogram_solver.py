@@ -50,6 +50,15 @@ def run_solver():
         emit('on_connect', {'data': 'Running genetic algorithm solver..'})
 
 
+@socketio.on('disconnect')
+def disconnect():
+    if 'user' not in session:
+        pass
+    else:
+        solvers[session['user']].is_running = False
+        session.clear()
+
+
 @socketio.on('update')
 def update_board(data):
     if 'user' not in session:

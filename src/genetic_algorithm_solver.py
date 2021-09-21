@@ -95,6 +95,7 @@ class GeneticAlgorithmSolver:
     NUM_ELITES = 2
 
     def __init__(self, puzzle, max_generation=1000):
+        self.is_running = True
         self.puzzle = puzzle
         self.nonogram = Nonogram(puzzle)
         self.current_generation = []
@@ -152,7 +153,7 @@ class GeneticAlgorithmSolver:
 
     def generate_solutions(self):
         self._initialize_population()
-        while self.generation_cnt < self.max_generation:
+        while self.is_running and self.generation_cnt < self.max_generation:
             next_generation = copy.deepcopy(
                 self.current_generation[-self.NUM_ELITES:])
 
