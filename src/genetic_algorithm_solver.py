@@ -146,7 +146,7 @@ class GeneticAlgorithmSolver:
         if fitness_delta < 0.001:
             self.mutation_rate = min(self.mutation_rate + 0.001, 1)
         else:
-            self.mutation_rate = max(self.mutation_rate - 0.001, 0)
+            self.mutation_rate = max(self.mutation_rate / 2, 0)
 
         self.max_fitness = max(self.max_fitness,
                                self.current_generation[-1].fitness)
