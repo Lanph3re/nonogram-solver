@@ -64,10 +64,13 @@ def update_board(data):
     if 'user' not in session:
         emit('on_update', {})
     else:
-        fittest, fitness = solvers[session['user']].get_fittest_population()
+        generation, fittest, fitness, is_running = \
+            solvers[session['user']].get_fittest_population()
         emit('on_update', {
+            'generation': generation,
             'board': fittest.nonogram.board,
-            'fitness': fitness
+            'fitness': fitness,
+            'is_running': is_running
         })
 
 

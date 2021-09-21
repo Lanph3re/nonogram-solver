@@ -13,7 +13,7 @@
       var socket = io.connect('http://localhost:5000');
 
       socket.on('on_connect', msg => {
-        document.getElementById('log').innerHTML += '[+] ' + msg.data + '<br>';
+        document.getElementById('log').innerHTML += ' [+] ' + msg.data + '<br>';
       });
 
       let generation_cnt = 0;
@@ -21,10 +21,13 @@
       socket.on('on_update', msg => {
         if (msg.fitness > max_fitness) {
           max_fitness = msg.fitness
-          document.getElementById('title_').innerHTML = 'Nonogram solver! [Fitness: ';
-          document.getElementById('title_').innerHTML += msg.fitness;
-          document.getElementById('title_').innerHTML += ']';
         }
+
+        document.getElementById('title_').innerHTML = 'Nonogram solver! ';
+        document.getElementById('title_').innerHTML +=
+          '[Generation: ' + msg.generation + ']';
+        document.getElementById('title_').innerHTML +=
+          '[Fitness: ' + msg.fitness + ']';
 
         let table = document.getElementById("puzzle");
         for (var i = 0, row; row = table.rows[i]; i++) {
@@ -35,6 +38,11 @@
               col.setAttribute('class', 'board-cell colored');
             }
           }
+        }
+
+        if (!msg.is_running) {
+          socket.disconnect();
+          document.getElementById('log').innerHTML += ' [+] GA Finished. <br>';
         }
       });
 

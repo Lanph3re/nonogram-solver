@@ -175,4 +175,5 @@ class GeneticAlgorithmSolver:
 
     def get_fittest_population(self):
         fittest = self.current_generation[-1]
-        return fittest, fittest.fitness
+        is_running = self.generation_cnt != self.max_generation
+        return self.generation_cnt, fittest, fittest.fitness, is_running
