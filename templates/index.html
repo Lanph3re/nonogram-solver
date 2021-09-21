@@ -19,7 +19,7 @@
 
       <ul>
         {% for puzzle in puzzles %}
-        <li><a href="/solver?puzzle={{ puzzle }}">{{ puzzle }}</a></li>
+        <li><a href="/solver?puzzle={{ puzzle }}&max_generation=1000">{{ puzzle }}</a></li>
         {% endfor %}
       </ul>
     </div>

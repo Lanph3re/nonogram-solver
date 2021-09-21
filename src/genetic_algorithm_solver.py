@@ -42,8 +42,8 @@ class Population:
     def random(cls, nonogram: 'Nonogram', min_solution):
         for i in range(nonogram.get_height()):
             while True:
-                row = Population.get_satisfying_arr(
-                    nonogram.get_width(), nonogram.row_clues[i])
+                row = Population.get_satisfying_arr(nonogram.get_width(),
+                                                    nonogram.row_clues[i])
                 if cls.is_minimum(nonogram, row, min_solution[i]):
                     break
             nonogram.board[i] = row
@@ -96,13 +96,13 @@ class Population:
 
 class GeneticAlgorithmSolver:
     POPULATION_SIZE = 100
-    MAX_GENERATION = 1000
     LINEAR_RANKING_PARAMETER = 1
     NUM_ELITES = 2
 
-    def __init__(self, puzzle):
+    def __init__(self, puzzle, max_generation=1000):
         self.puzzle = puzzle
         self.current_generation = []
+        self.max_generation = max_generation
         self.generation_cnt = 0
         self.max_fitness = 0
         self.mutation_rate = 0.2
@@ -110,8 +110,8 @@ class GeneticAlgorithmSolver:
 
     def _initialize_population(self):
         for _ in range(self.POPULATION_SIZE):
-            population = Population.random(
-                Nonogram(self.puzzle), self.min_solution)
+            population = Population.random(Nonogram(self.puzzle),
+                                           self.min_solution)
             self.current_generation.append(population.update_fitness())
 
     def _exponential_ranking_select(self):
@@ -148,7 +148,7 @@ class GeneticAlgorithmSolver:
 
     def generate_solutions(self):
         self._initialize_population()
-        while True:
+        while self.generation_cnt < self.max_generation:
             next_generation = copy.deepcopy(
                 self.current_generation[-self.NUM_ELITES:])
 

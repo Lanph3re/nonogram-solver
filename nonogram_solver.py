@@ -26,12 +26,13 @@ def puzzle_list():
 @app.route('/solver')
 def nonogram_solver():
     puzzle_name = os.path.join(PUZZLE_DIR, request.args.get('puzzle'))
+    max_generation = int(request.args.get('max_generation', 1000))
     if not os.path.isfile(puzzle_name):
         return render_template('index.html', puzzles=puzzles)
 
     puzzle = json.loads(open(puzzle_name).read())
     session['user'] = os.urandom(32)
-    solvers[session['user']] = GeneticAlgorithmSolver(puzzle)
+    solvers[session['user']] = GeneticAlgorithmSolver(puzzle, max_generation)
     solver_thread = \
         threading.Thread(
             target=lambda solvers, id: solvers[id].generate_solutions(),
