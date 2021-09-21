@@ -9,7 +9,6 @@ from .rule_based_solver import RuleBasedSolver
 
 class Population:
     CROSSOVER_RATE = 0.6
-    SAMPLING_COLUMN_SIZE = 20
 
     def __init__(self, nonogram):
         self.nonogram = nonogram
@@ -50,23 +49,18 @@ class Population:
 
         return Population(nonogram)
 
-    def update_fitness(self):
+    def update_fitness(self, column_pool):
         nonogram = self.nonogram
         fitness = 0
 
         for j in range(nonogram.get_width()):
-            clue = nonogram.col_clues[j]
             max_fitness_column = 0
             column = nonogram.get_column(j)
-            possible_columns = [
-                self.get_satisfying_arr(nonogram.get_height(), clue)
-                for _ in range(self.SAMPLING_COLUMN_SIZE)
-            ]
-            for possible_column in possible_columns:
-                fitness_column = sum([
-                    10 if column[k] == possible_column[k] else 0
-                    for k in range(nonogram.get_height())
-                ])
+            for possible_column in column_pool[j]:
+                fitness_column = 0
+                for k in range(nonogram.get_height()):
+                    if column[k] == possible_column[k]:
+                        fitness_column += 10
                 fitness_column /= nonogram.get_height()
                 max_fitness_column = max(max_fitness_column, fitness_column)
 
@@ -95,24 +89,34 @@ class Population:
 
 
 class GeneticAlgorithmSolver:
+    SAMPLING_COLUMN_SIZE = 30
     POPULATION_SIZE = 100
     LINEAR_RANKING_PARAMETER = 1
     NUM_ELITES = 2
 
     def __init__(self, puzzle, max_generation=1000):
         self.puzzle = puzzle
+        self.nonogram = Nonogram(puzzle)
         self.current_generation = []
         self.max_generation = max_generation
         self.generation_cnt = 0
         self.max_fitness = 0
         self.mutation_rate = 0.2
         self.min_solution = RuleBasedSolver(puzzle).generate_solution().board
+        self.column_pool = [
+            [
+                Population.get_satisfying_arr(
+                    self.nonogram.get_height(), self.nonogram.col_clues[i])
+                for _ in range(self.SAMPLING_COLUMN_SIZE)
+            ] for i in range(self.nonogram.get_width())
+        ]
 
     def _initialize_population(self):
         for _ in range(self.POPULATION_SIZE):
             population = Population.random(Nonogram(self.puzzle),
                                            self.min_solution)
-            self.current_generation.append(population.update_fitness())
+            self.current_generation.append(
+                population.update_fitness(self.column_pool))
 
     def _exponential_ranking_select(self):
         weights = [1 - exp(-x) for x in range(1, self.POPULATION_SIZE + 1)]
@@ -155,8 +159,10 @@ class GeneticAlgorithmSolver:
             while len(next_generation) < self.POPULATION_SIZE:
                 a, b = copy.deepcopy(self._select())
                 a, b = Population.crossover(a, b)
-                a = a.mutate(self.mutation_rate).update_fitness()
-                b = b.mutate(self.mutation_rate).update_fitness()
+                a = a.mutate(self.mutation_rate).update_fitness(
+                    self.column_pool)
+                b = b.mutate(self.mutation_rate).update_fitness(
+                    self.column_pool)
                 next_generation += [a, b]
 
             self.current_generation = \
