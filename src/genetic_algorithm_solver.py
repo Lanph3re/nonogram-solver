@@ -104,18 +104,17 @@ class GeneticAlgorithmSolver:
         self.mutation_rate = 0.2
         self.min_solution = \
             RuleBasedSolver(puzzle).generate_solution().board
-        self.column_pool = [
-            [
-                Population.get_satisfying_arr(
-                    self.nonogram.get_height(), self.nonogram.col_clues[i])
-                for _ in range(self.nonogram.get_height() * 2)
-            ] for i in range(self.nonogram.get_width())
-        ]
+        self.column_pool = [[
+            Population.get_satisfying_arr(self.nonogram.get_height(),
+                                          self.nonogram.col_clues[i])
+            for _ in range(self.nonogram.get_height() * 2)
+        ] for i in range(self.nonogram.get_width())]
 
     def _initialize_population(self):
         self.current_generation = [
             Population.random(Nonogram(self.puzzle), self.min_solution)
-            for _ in range(self.POPULATION_SIZE)]
+            for _ in range(self.POPULATION_SIZE)
+        ]
         for population in self.current_generation:
             population.update_fitness(self.column_pool)
 
@@ -175,7 +174,7 @@ class GeneticAlgorithmSolver:
         return self.current_generation
 
     def get_fittest_population(self):
-        while len(self.current_generation) == 0:
+        if len(self.current_generation) == 0:
             return 0, Nonogram(self.puzzle), 0, True
 
         fittest = self.current_generation[-1]
