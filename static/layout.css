@@ -3,7 +3,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   min-height: 100%;
   font-size: 13px;
 }
@@ -50,11 +51,11 @@ td.board-cell {
   text-align: center;
   color: #000000;
   vertical-align: middle;
-  border: 1px solid #8F8F8F;
+  border: 1px solid #8f8f8f;
 }
 
 #emtpy-area {
-  background: #8F8F8F;
+  background: #8f8f8f;
 }
 
 .colored {
@@ -67,4 +68,10 @@ td.board-cell {
 
 .clue {
   background: #d0d0d0;
+}
+
+#log {
+  margin-top: 20px;
+  border: 1px solid #000000;
+  width: 450px;
 }
